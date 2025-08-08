@@ -1,0 +1,50 @@
+# Composer dependencies
+/vendor/
+composer.lock
+
+# PHP CS Fixer cache
+.php_cs.cache
+.php-cs-fixer.cache
+
+# PHPUnit
+.phpunit.result.cache
+.phpunit.cache/
+/coverage/
+/coverage-html/
+/coverage-xml/
+coverage.xml
+coverage.txt
+
+# IDE & editors
+/.idea/
+/.vscode/
+*.sublime-project
+*.sublime-workspace
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Build files
+/build/
+/dist/
+
+# Logs
+/logs/
+*.log
+
+# Cache files
+/cache/
+/test.php
