@@ -3,12 +3,13 @@
 namespace Radeir\Services;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use Radeir\DTOs\RadeTokenDTO;
 use Radeir\Services\TokenManager\TokenManagerInterface;
+use Throwable;
 
 abstract class AbstractServices
 {
-
 	protected Client $httpClient;
 
 	protected string $baseUrl;
@@ -29,17 +30,43 @@ abstract class AbstractServices
 	}
 
 	protected function makeRequest(string $method, string $endpoint, array $options = []) {
-		$radeTokenDTO = $this->getToken();
+		$maxRetries = 1;
+		$attempts   = 0;
 
-		$options['headers'] = array_merge(
-			[
-				'Accept'       => 'application/json',
-				'Content-Type' => 'application/json'
-			],
-			$options['headers'] ?? [],
-			['Authorization' => 'Bearer ' . $radeTokenDTO->getAccessToken()]
-		);
+		while ($attempts <= $maxRetries) {
+			try {
+				$radeTokenDTO = $this->getToken();
 
-		return $this->httpClient->request($method, $this->baseUrl . $endpoint . '?applicant=php_package_sdk', $options);
+				$options['headers'] = array_merge(
+					[
+						'Accept'       => 'application/json',
+						'Content-Type' => 'application/json'
+					],
+					$options['headers'] ?? [],
+					['Authorization' => 'Bearer ' . $radeTokenDTO->getAccessToken()]
+				);
+
+				return $this->httpClient->request(
+					$method,
+					$this->baseUrl . $endpoint . '?applicant=php_package_sdk',
+					$options
+				);
+			} catch (Throwable $e) {
+				if ($e instanceof ClientException) {
+
+					$response   = $e->getResponse();
+					$statusCode = $response->getStatusCode();
+					if ($statusCode === 401 && $attempts < $maxRetries) {
+						$this->tokenManager->refreshToken();
+						$attempts++;
+						continue;
+					}
+				}
+
+				throw $e;
+			}
+		}
+
+        return null;
 	}
 }

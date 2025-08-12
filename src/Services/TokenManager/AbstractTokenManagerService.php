@@ -23,7 +23,7 @@ abstract class AbstractTokenManagerService implements TokenManagerInterface
 	protected \GuzzleHttp\ClientInterface $httpClient;
 
 	public function __construct(
-		protected array $config,
+		protected array  $config,
 		?ClientInterface $httpClient = null
 	) {
 		$requiredParams = ['username', 'password', 'scopes', 'baseUrl'];
@@ -37,13 +37,13 @@ abstract class AbstractTokenManagerService implements TokenManagerInterface
 			throw new RadeException("Parameter 'scopes' must be an array");
 		}
 
-		$this->baseUrl = $this->config['baseUrl'];
+		$this->baseUrl    = $this->config['baseUrl'];
 		$this->httpClient = $httpClient ?? new Client(['verify' => true]);
 	}
 
 	protected function getToken(string $username, string $password, array $scopes): RadeTokenDTO {
 		try {
-			$response = $this->httpClient->post($this->baseUrl . '/token', [
+			$response     = $this->httpClient->post($this->baseUrl . '/token', [
 				'headers' => [
 					'Accept'       => 'application/json',
 					'Content-Type' => 'application/json'
@@ -97,6 +97,14 @@ abstract class AbstractTokenManagerService implements TokenManagerInterface
 		}
 
 		return $this->token;
+	}
+
+	public function refreshToken(): void {
+		$this->token = $this->getToken(
+			$this->config['username'],
+			$this->config['password'],
+			$this->config['scopes']
+		);
 	}
 
 	abstract public function loadToken(): ?RadeTokenDTO;

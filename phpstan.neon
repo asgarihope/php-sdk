@@ -2,3 +2,7 @@ parameters:
     level: 1
     paths:
         - src
+    excludePaths:
+        - src/Config/*
+        - src/Facade/*
+        - src/Provider/*
