@@ -37,7 +37,7 @@ class DefaultTokenManager extends AbstractTokenManagerService
 
 		// Ensure directory exists
 		$filePath = $this->getTokenFileCacheAddress();
-		$dir = dirname($filePath);
+		$dir      = dirname($filePath);
 
 		// Only try to create directory if it doesn't exist
 		if (!file_exists($dir)) {
