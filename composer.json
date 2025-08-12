@@ -3,7 +3,6 @@
 	"description": "Rade SDK Seamlessly integrate secure and reliable banking services into your application.",
 	"type": "library",
 	"license": "MIT",
-	"version": "1.0.0",
 	"authors": [
 		{
 			"name": "Omid Asgari",
