@@ -2,28 +2,15 @@
 
 namespace Radeir\Services;
 
-use Exception;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\ServerException;
 use Radeir\DTOs\IbanInquiryDTO;
+use Radeir\Enums\ServiceEnum;
 use Radeir\Exceptions\InvalidInputException;
-use Radeir\Exceptions\RadeClientException;
 use Radeir\Exceptions\RadeException;
-use Radeir\Exceptions\RadeServiceException;
 use Radeir\Helpers\NumberHelper;
-use Radeir\Services\TokenManager\TokenManagerInterface;
+use Throwable;
 
 class IbanInquiryService extends AbstractServices
 {
-
-	public function __construct(
-		TokenManagerInterface $tokenManager,
-		array                 $config
-	) {
-		parent::__construct($tokenManager, $config);
-	}
-
 	public function ibanInquiry(string $iban): IbanInquiryDTO {
 		try {
 			$iban = NumberHelper::convertToEnglishNumbers($iban);
@@ -49,26 +36,10 @@ class IbanInquiryService extends AbstractServices
 			}
 
 			throw new RadeException('Invalid Response');
-
-		} catch (ClientException $e) {
-			$response     = $e->getResponse();
-			$errorBody    = json_decode($response->getBody()->getContents(), true);
-			$errorMessage = $errorBody['message'] ?? 'Client error: ' . $response->getStatusCode();
-
-			throw new RadeClientException($errorMessage, $response->getStatusCode());
-
-		} catch (ServerException $e) {
-			$response     = $e->getResponse();
-			$errorBody    = json_decode($response->getBody()->getContents(), true);
-			$errorMessage = $errorBody['message'] ?? 'Server error: ' . $response->getStatusCode();
-
-			throw new RadeServiceException($errorMessage, $response->getStatusCode());
-
-		} catch (GuzzleException|Exception $e) {
-			throw new RadeException('Error in IBAN inquiry service: ' . $e->getMessage(), $e->getCode());
+		} catch (Throwable $throwable) {
+			throw $this->handleRequestException($throwable, ServiceEnum::IBAN_INQUIRY);
 		}
 	}
-
 
 	private function validateIban(string $iban): string {
 		$normalizedIban = str_replace(' ', '', $iban);

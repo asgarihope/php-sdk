@@ -2,25 +2,19 @@
 
 namespace Radeir\Services;
 
-use Exception;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\ServerException;
 use Radeir\DTOs\DepositToIbanBankDTO;
 use Radeir\DTOs\DepositToIbanDTO;
-use Radeir\Exceptions\RadeClientException;
+use Radeir\Enums\ServiceEnum;
 use Radeir\Exceptions\RadeException;
-use Radeir\Exceptions\RadeServiceException;
 use Radeir\Helpers\NumberHelper;
+use Throwable;
 
 class DepositToIbanService extends AbstractServices
 {
-
 	public function depositToIban(string $depositNumber, string $bankCode): DepositToIbanDTO {
 		try {
 			$depositNumber = NumberHelper::convertToEnglishNumbers($depositNumber);
-
-			$response = $this->makeRequest('POST', '/service/depositToIban', [
+			$response      = $this->makeRequest('POST', '/service/depositToIban', [
 				'json' => [
 					'deposit' => $depositNumber,
 					'bank'    => $bankCode
@@ -41,23 +35,8 @@ class DepositToIbanService extends AbstractServices
 			}
 
 			throw new RadeException('Invalid Response');
-
-		} catch (ClientException $e) {
-			$response     = $e->getResponse();
-			$errorBody    = json_decode($response->getBody()->getContents(), true);
-			$errorMessage = $errorBody['message'] ?? 'Client error: ' . $response->getStatusCode();
-
-			throw new RadeClientException($errorMessage, $response->getStatusCode());
-
-		} catch (ServerException $e) {
-			$response     = $e->getResponse();
-			$errorBody    = json_decode($response->getBody()->getContents(), true);
-			$errorMessage = $errorBody['message'] ?? 'Server error: ' . $response->getStatusCode();
-
-			throw new RadeServiceException($errorMessage, $response->getStatusCode());
-
-		} catch (GuzzleException|Exception $e) {
-			throw new RadeException('Error in card to IBAN service: ' . $e->getMessage(), $e->getCode());
+		} catch (Throwable $throwable) {
+			throw $this->handleRequestException($throwable, ServiceEnum::DEPOSIT_TO_IBAN);
 		}
 	}
 
@@ -75,23 +54,8 @@ class DepositToIbanService extends AbstractServices
 			}
 
 			return $list;
-
-		} catch (ClientException $e) {
-			$response     = $e->getResponse();
-			$errorBody    = json_decode($response->getBody()->getContents(), true);
-			$errorMessage = $errorBody['message'] ?? 'Client error: ' . $response->getStatusCode();
-
-			throw new RadeClientException($errorMessage, $response->getStatusCode());
-
-		} catch (ServerException $e) {
-			$response     = $e->getResponse();
-			$errorBody    = json_decode($response->getBody()->getContents(), true);
-			$errorMessage = $errorBody['message'] ?? 'Server error: ' . $response->getStatusCode();
-
-			throw new RadeServiceException($errorMessage, $response->getStatusCode());
-
-		} catch (GuzzleException|Exception $e) {
-			throw new RadeException('Error in get bank list service: ' . $e->getMessage(), $e->getCode());
+		} catch (Throwable $throwable) {
+			throw $this->handleRequestException($throwable, ServiceEnum::DEPOSIT_TO_IBAN_BANK_LIST);
 		}
 	}
 

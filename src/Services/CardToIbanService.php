@@ -2,21 +2,16 @@
 
 namespace Radeir\Services;
 
-use Exception;
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Exception\ServerException;
 use Radeir\DTOs\CardToIbanDTO;
+use Radeir\Enums\ServiceEnum;
 use Radeir\Exceptions\InvalidInputException;
-use Radeir\Exceptions\RadeClientException;
 use Radeir\Exceptions\RadeException;
-use Radeir\Exceptions\RadeServiceException;
 use Radeir\Helpers\NumberHelper;
 use Radeir\Services\TokenManager\TokenManagerInterface;
+use Throwable;
 
 class CardToIbanService extends AbstractServices
 {
-
 	public function __construct(
 		TokenManagerInterface $tokenManager,
 		array                 $config
@@ -50,23 +45,8 @@ class CardToIbanService extends AbstractServices
 			}
 
 			throw new RadeException('Invalid Response');
-
-		} catch (ClientException $e) {
-			$response     = $e->getResponse();
-			$errorBody    = json_decode($response->getBody()->getContents(), true);
-			$errorMessage = $errorBody['message'] ?? 'Client error: ' . $response->getStatusCode();
-
-			throw new RadeClientException($errorMessage, $response->getStatusCode());
-
-		} catch (ServerException $e) {
-			$response     = $e->getResponse();
-			$errorBody    = json_decode($response->getBody()->getContents(), true);
-			$errorMessage = $errorBody['message'] ?? 'Server error: ' . $response->getStatusCode();
-
-			throw new RadeServiceException($errorMessage, $response->getStatusCode());
-
-		} catch (GuzzleException|Exception $e) {
-			throw new RadeException('Error in card to IBAN service: ' . $e->getMessage(), $e->getCode());
+		} catch (Throwable $throwable) {
+			throw $this->handleRequestException($throwable, ServiceEnum::CARD_TO_IBAN);
 		}
 	}
 
@@ -82,6 +62,7 @@ class CardToIbanService extends AbstractServices
 		}
 
 		// If neither format matches, throw exception
-		throw new InvalidInputException('فرمت شماره کارت وارد شده صحیح نیست. شماره‌کارت باید 16 رقم یا به فرمت 1111-2222-3333-4444 باشد.', 422);
+		throw new InvalidInputException('فرمت شماره کارت وارد شده صحیح نیست. شماره‌کارت باید 16 رقم یا به فرمت 1111-2222-3333-4444 باشد.',
+			422);
 	}
 }

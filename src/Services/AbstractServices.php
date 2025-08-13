@@ -4,9 +4,16 @@ namespace Radeir\Services;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\ServerException;
+use GuzzleHttp\Exception\GuzzleException;
 use Radeir\DTOs\RadeTokenDTO;
+use Radeir\Enums\ServiceEnum;
+use Radeir\Exceptions\RadeClientException;
+use Radeir\Exceptions\RadeServiceException;
+use Radeir\Exceptions\RadeException;
 use Radeir\Services\TokenManager\TokenManagerInterface;
 use Throwable;
+use Exception;
 
 abstract class AbstractServices
 {
@@ -67,6 +74,30 @@ abstract class AbstractServices
 			}
 		}
 
-        return null;
+		return null;
+	}
+
+	protected function handleRequestException(Throwable $throwable, ServiceEnum $serviceEnum): Throwable {
+		if ($throwable instanceof ClientException) {
+			$response     = $throwable->getResponse();
+			$errorBody    = json_decode($response->getBody()->getContents(), true);
+			$errorMessage = $errorBody['message'] ?? 'Client error: ' . $response->getStatusCode();
+
+			return new RadeClientException($errorMessage, $response->getStatusCode());
+		}
+
+		if ($throwable instanceof ServerException) {
+			$response     = $throwable->getResponse();
+			$errorBody    = json_decode($response->getBody()->getContents(), true);
+			$errorMessage = $errorBody['message'] ?? 'Server error: ' . $response->getStatusCode();
+
+			return new RadeServiceException($errorMessage, $response->getStatusCode());
+		}
+
+		if ($throwable instanceof GuzzleException || $throwable instanceof Exception) {
+			return new RadeException('Error in ' . $serviceEnum->value . ': ' . $throwable->getMessage(), $throwable->getCode());
+		}
+
+		return $throwable;
 	}
 }
