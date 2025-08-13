@@ -308,7 +308,7 @@ class DepositToIbanServiceTest extends TestCase
 
         // Expect a RadeException
         $this->expectException(RadeException::class);
-        $this->expectExceptionMessage('Error in get bank list service');
+        $this->expectExceptionMessage('Error in depositToIbanBankList: General error');
 
         // Call the service
         $this->service->getBankList();

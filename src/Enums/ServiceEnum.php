@@ -10,4 +10,5 @@ enum ServiceEnum: string
 	case DEPOSIT_TO_IBAN = 'depositToIban';
 	case DEPOSIT_TO_IBAN_BANK_LIST = 'depositToIbanBankList';
 	case IBAN_INQUIRY = 'ibanInquiry';
+	case IBAN_OWNER_VERIFICATION = 'ibanOwnerVerification';
 }
