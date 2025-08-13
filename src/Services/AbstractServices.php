@@ -8,6 +8,7 @@ use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\Exception\GuzzleException;
 use Radeir\DTOs\RadeTokenDTO;
 use Radeir\Enums\ServiceEnum;
+use Radeir\Exceptions\InvalidInputException;
 use Radeir\Exceptions\RadeClientException;
 use Radeir\Exceptions\RadeServiceException;
 use Radeir\Exceptions\RadeException;
@@ -95,7 +96,8 @@ abstract class AbstractServices
 		}
 
 		if ($throwable instanceof GuzzleException || $throwable instanceof Exception) {
-			return new RadeException('Error in ' . $serviceEnum->value . ': ' . $throwable->getMessage(), $throwable->getCode());
+			return new RadeException('Error in ' . $serviceEnum->value . ': ' . $throwable->getMessage(),
+				$throwable->getCode());
 		}
 
 		return $throwable;

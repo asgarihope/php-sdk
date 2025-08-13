@@ -4,9 +4,9 @@ namespace Radeir\Services;
 
 use Radeir\DTOs\IbanInquiryDTO;
 use Radeir\Enums\ServiceEnum;
-use Radeir\Exceptions\InvalidInputException;
 use Radeir\Exceptions\RadeException;
 use Radeir\Helpers\NumberHelper;
+use Radeir\Rules\IbanValidationRule;
 use Throwable;
 
 class IbanInquiryService extends AbstractServices
@@ -14,7 +14,7 @@ class IbanInquiryService extends AbstractServices
 	public function ibanInquiry(string $iban): IbanInquiryDTO {
 		try {
 			$iban = NumberHelper::convertToEnglishNumbers($iban);
-			$iban = $this->validateIban($iban);
+			$iban = IbanValidationRule::passes($iban);
 
 			$response = $this->makeRequest('POST', '/service/ibanInquiry', [
 				'json' => [
@@ -39,18 +39,5 @@ class IbanInquiryService extends AbstractServices
 		} catch (Throwable $throwable) {
 			throw $this->handleRequestException($throwable, ServiceEnum::IBAN_INQUIRY);
 		}
-	}
-
-	private function validateIban(string $iban): string {
-		$normalizedIban = str_replace(' ', '', $iban);
-		if (preg_match('/^[iI][rR]\d{24}$/i', $normalizedIban)) {
-			return substr($normalizedIban, 2);
-		}
-
-		if (preg_match('/^\d{24}$/', $normalizedIban)) {
-			return $normalizedIban;
-		}
-
-		throw new InvalidInputException('فرمت شماره شبا وارد شده صحیح نیست. شماره شبا باید 24 رقم بدون IR یا 26 کاراکتر با IR باشد.', 422);
 	}
 }
