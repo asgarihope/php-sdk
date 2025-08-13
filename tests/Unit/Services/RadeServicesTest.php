@@ -7,10 +7,12 @@ use Radeir\DTOs\CardToDepositDTO;
 use Radeir\DTOs\CardToIbanDTO;
 use Radeir\DTOs\DepositToIbanDTO;
 use Radeir\DTOs\IbanInquiryDTO;
+use Radeir\DTOs\IbanOwnerVerificationDTO;
 use Radeir\Services\CardToDepositService;
 use Radeir\Services\CardToIbanService;
 use Radeir\Services\DepositToIbanService;
 use Radeir\Services\IbanInquiryService;
+use Radeir\Services\IbanOwnerVerificationService;
 use Radeir\Services\RadeServices;
 use Radeir\Services\ServiceFactory;
 use Radeir\Services\TokenManager\TokenManagerInterface;
@@ -261,6 +263,60 @@ class RadeServicesTest extends TestCase
 		$this->assertEquals('trace012', $result->trackID);
 		$this->assertEquals('Test Bank', $result->bankName);
 		$this->assertEquals('John Doe', $result->owners);
+	}
+
+	public function testIbanOwnerVerification()
+	{
+		// 1. Create the mocks
+		$serviceFactory = $this->createMock(ServiceFactory::class);
+		$ibanOwnerVerificationService = $this->createMock(IbanOwnerVerificationService::class);
+		$tokenManager = $this->createMock(TokenManagerInterface::class);
+
+		// 2. Configure mocks to avoid HTTP calls
+		$serviceFactory->method('createIbanOwnerVerificationService')
+			->willReturn($ibanOwnerVerificationService);
+
+		// 3. Set up the expected return value
+		$mockDTO = new IbanOwnerVerificationDTO(
+			'trace345',           // trackID
+			'yes'                 // result ('yes', 'no', or 'most_possible')
+		);
+
+		// 4. Configure service mock to return expected value
+		$ibanOwnerVerificationService->method('ibanOwnerVerification')
+			->with(
+				'IR123456789012345678901234',
+				'0082633053',
+				'1370',
+				'03',
+				'05'
+			)
+			->willReturn($mockDTO);
+
+		// 5. Create a test double for RadeServices
+		$radeServices = $this->getMockBuilder(RadeServices::class)
+			->setConstructorArgs([['baseUrl' => 'https://test.com'], $tokenManager])
+			->onlyMethods(['__construct'])
+			->getMock();
+
+		// 6. Set the mocked service factory
+		$reflection = new \ReflectionProperty(RadeServices::class, 'serviceFactory');
+		$reflection->setAccessible(true);
+		$reflection->setValue($radeServices, $serviceFactory);
+
+		// 7. Test the method
+		$result = $radeServices->ibanOwnerVerification(
+			'IR123456789012345678901234',
+			'0082633053',
+			'1370',
+			'03',
+			'05'
+		);
+
+		// 8. Assert the result
+		$this->assertInstanceOf(IbanOwnerVerificationDTO::class, $result);
+		$this->assertEquals('trace345', $result->trackID);
+		$this->assertEquals('yes', $result->result);
 	}
 
 	public function testConstructorWithCustomTokenManager()

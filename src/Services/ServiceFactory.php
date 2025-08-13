@@ -52,4 +52,13 @@ class ServiceFactory
 		return $this->services[$serviceName];
 	}
 
+	public function createIbanOwnerVerificationService(): IbanOwnerVerificationService {
+		$serviceName = ServiceEnum::IBAN_OWNER_VERIFICATION->value;
+		if (!isset($this->services[$serviceName])) {
+			$this->services[$serviceName] = new IbanOwnerVerificationService($this->tokenManager, $this->config);
+		}
+
+		return $this->services[$serviceName];
+	}
+
 }

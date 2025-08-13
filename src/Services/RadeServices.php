@@ -6,6 +6,7 @@ use Radeir\DTOs\CardToDepositDTO;
 use Radeir\DTOs\CardToIbanDTO;
 use Radeir\DTOs\DepositToIbanDTO;
 use Radeir\DTOs\IbanInquiryDTO;
+use Radeir\DTOs\IbanOwnerVerificationDTO;
 use Radeir\Services\TokenManager\DefaultTokenManager;
 use Radeir\Services\TokenManager\TokenManagerInterface;
 
@@ -45,5 +46,21 @@ class RadeServices
 
 	public function ibanInquiry(string $iban): IbanInquiryDTO {
 		return $this->serviceFactory->createIbanInquiryService()->ibanInquiry($iban);
+	}
+
+	public function ibanOwnerVerification(
+		string $iban,
+		string $nationalityCode,
+		string $birthDateYear,
+		string $birthDateMonth,
+		string $birthDateDay,
+	): IbanOWnerVerificationDTO {
+		return $this->serviceFactory->createIbanOwnerVerificationService()->ibanOwnerVerification(
+			$iban,
+			$nationalityCode,
+			$birthDateYear,
+			$birthDateMonth,
+			$birthDateDay,
+		);
 	}
 }

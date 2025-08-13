@@ -137,6 +137,7 @@ class MyController
 - [کارت به حساب](docs/fa/card-to-deposit.md)
 - [حساب به شبا](docs/fa/deposit-to-iban.md)
 - [استعلام شبا](docs/fa/iban-inquiry.md)
+- [انطباق شماره شبا با کد ملی](docs/fa/iban-owner-verification.md)
 
 
 ## مشارکت در پروژه

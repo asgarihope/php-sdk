@@ -16,6 +16,13 @@
 		<include>
 			<directory suffix=".php">./src</directory>
 		</include>
+		<exclude>
+			<directory>./src/Config</directory>
+			<directory>./src/Facade</directory>
+			<directory>./src/Provider</directory>
+			<directory>./src/Enums</directory>
+			<directory>./src/Exceptions</directory>
+		</exclude>
 	</source>
 	<php>
 		<env name="APP_ENV" value="testing"/>
